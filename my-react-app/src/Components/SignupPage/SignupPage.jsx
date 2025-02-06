@@ -19,7 +19,7 @@ const SignupPage = () => {
   const [password, setPassword] = useState("");
 
   const createUser = (event) => {
-    event.preventDefault();  // Prevents page reload
+    event.preventDefault();  
 
     createUserWithEmailAndPassword(auth, email, password)
       .then(() => alert("Success"))
