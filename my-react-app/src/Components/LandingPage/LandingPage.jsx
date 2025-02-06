@@ -44,7 +44,9 @@ function LandingPage(){
     
             {/* Call to Action Section */}
             <div className="cta">
+              <Link to="/signin">
                 <button className="cta-btn">Try the AI Quiz</button>
+              </Link>
             </div>
         </div>
     );
