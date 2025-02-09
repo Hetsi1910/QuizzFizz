@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import  { useState } from 'react';  // Ensure useState is imported
 import { Link } from "react-router-dom";
 import google from "../assets/Google.png";
@@ -9,6 +10,9 @@ import { createUserWithEmailAndPassword,
          GoogleAuthProvider,
          signInWithPopup } from 'firebase/auth';
 import { app } from "../../context/firebase";
+import { db } from "../../context/firebase";
+import { setDoc,doc } from "firebase/firestore";
+
 
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
@@ -18,20 +22,59 @@ const SignupPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const createUser = (event) => {
-    event.preventDefault();  
+  const navigate = useNavigate(); // Initialize navigation
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(() => alert("Success"))
-      .catch((error) => alert(error.message)); // Proper error handling
+
+  const createUser = async (event) => {
+    event.preventDefault();
+    
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      if (user) {
+        // Store user data in Firestore
+        await setDoc(doc(db, "Users", user.uid), {
+          email: user.email,
+          name: name,
+        });
+      }
+  
+      alert("Success");
+      navigate("/search"); // Redirect after successful sign-up
+    } catch (error) {
+      alert(error.message);
+    }
   };
-
-  const signupWithGoogle = () =>{
-    signInWithPopup(auth, googleProvider);
-  }
+  
+  
+  const signupWithGoogle = async () => {
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      const user = userCredential.user;
+  
+      if (user) {
+        // Store user data in Firestore
+        await setDoc(doc(db, "Users", user.uid), {
+          email: user.email,
+          name: user.displayName, // Get name from Google profile
+        });
+      }
+  
+      alert("Signed up with Google successfully");
+      navigate("/search"); // Redirect after successful Google sign-up
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  
+  
 
   return (
     <div className="signup-container">
+    {/* Semicircles */}
+    <div className="top-left-circle"></div>
+    <div className="top-right-circle"></div>
       <div className="signup-header">
         <img src={logo} alt="QuizFizz Logo" className="logo-image" />
       </div>  
@@ -44,30 +87,33 @@ const SignupPage = () => {
               <label htmlFor="name">Name</label>
               <input 
                 onChange={(e) => setName(e.target.value)}
-                value={name || ""}  // Fallback in case of undefined
+                value={name}  // Fallback in case of undefined
                 type="text"
                 id="name"
                 placeholder="Enter your name" 
+                required
               />
             </div>
             <div className="form-group">
               <label htmlFor="email">Email Address</label>
               <input 
                 onChange={(e) => setEmail(e.target.value)}
-                value={email || ""}
+                value={email}
                 type="email"
                 id="email"
                 placeholder="Enter your email" 
+                required
               />
             </div>
             <div className="form-group">
               <label htmlFor="password">Password</label>
               <input
                 onChange={(e) => setPassword(e.target.value)}
-                value={password || ""}
+                value={password}
                 type="password"
                 id="password"
                 placeholder="Enter your password"
+                required
               />
             </div>
             <button type="submit" className="signup-btn">
