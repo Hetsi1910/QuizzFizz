@@ -1,16 +1,19 @@
 :root{
-    --white: #FFFFFF;
-    --blue: #2C24FF;
-    --black:  #000000;
-    --light-blue:#D0CFFD;
-    --dark-blue: #040080;
-    --lilac:#8885FF;
-    --indigo:#040080;
-    --grey: #cccccc;
-  }
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: var(--white);
-  }
+  --white: #FFFFFF;
+  --blue: #2C24FF;
+  --black:  #000000;
+  --light-blue:#D0CFFD;
+  --dark-blue: #040080;
+  --lilac:#8885FF;
+  --indigo:#040080;
+  --grey: #cccccc;
+  --violet: #5C58FF;
+  --periwinkle:#B8B7FB;
+  --yellow: #f0a500;
+}
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--white);
+}

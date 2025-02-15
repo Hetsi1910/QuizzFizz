@@ -1,21 +1,31 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Import necessary components for routing
-import './App.css' // Import global styles
-import LandingPage from './Components/LandingPage/LandingPage' // Import LandingPage component
-import SigninPage from './Components/SigninPage/SigninPage' // Import SigninPage component
-import SignupPage from './Components/SignupPage/SignupPage' // Import SignupPage component
-import SearchPage from './Components/SearchPage/SearchPage'; // Import SearchPage component
+
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import './App.css'
+import LandingPage from './Components/LandingPage/LandingPage'
+import SigninPage from './Components/SigninPage/SigninPage'
+import SignupPage from './Components/SignupPage/SignupPage'
+import SearchPage from './Components/SearchPage/SearchPage';
+import ResultPage from "./Components/ResultPage/ResultPage";
+import Quiz from "./Components/Quiz/Quiz";
+import Scoreboard from "./Components/Scoreboard/Scoreboard";
+
 
 function App() {
   return (
-    <Router> {/* Wrap the app in Router to enable navigation */}
-      <Routes> {/* Define all application routes */}
-        <Route path="/" element={<LandingPage />} /> {/* Route for the landing page */}
-        <Route path="/signin" element={<SigninPage />} /> {/* Route for the sign-in page */}
-        <Route path="/signup" element={<SignupPage />} /> {/* Route for the sign-up page */}
-        <Route path="/search" element={<SearchPage />} /> {/* Route for the search page */}
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/signin" element={<SigninPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/result" element={<ResultPage />} />
+        <Route path="/quiz" element={<Quiz />} />
+        <Route path="/scoreboard" element={<Scoreboard />} /> {/* Route for Scoreboard */}
+        
       </Routes>
     </Router>
   );
 }
 
-export default App; // Export App component as default
+
+export default App

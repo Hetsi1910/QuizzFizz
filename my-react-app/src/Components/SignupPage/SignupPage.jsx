@@ -1,96 +1,124 @@
 import { useNavigate } from "react-router-dom"; // Import useNavigate
-import  { useState } from 'react';  // Ensure useState is imported
+import { useState } from "react";  // Ensure useState is imported
 import { Link } from "react-router-dom";
-import google from "../assets/Google.png";
 import signup from "../assets/Signupimage.png";
 import logo from "../assets/logo.png";
-import './SignupPage.css';
-import { createUserWithEmailAndPassword, 
-         getAuth, 
-         GoogleAuthProvider,
-         signInWithPopup } from 'firebase/auth';
-import { app } from "../../context/firebase";
-import { db } from "../../context/firebase";
-import { setDoc,doc } from "firebase/firestore";
-
+import "./SignupPage.css";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { app, db } from "../../context/firebase";
+import { setDoc, doc, getDocs, collection, query, where  } from "firebase/firestore";
 
 const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
 
 const SignupPage = () => {
-  const [name, setName] = useState("");  // Ensure default value is ""
+  const [studentId, setStudentId] = useState("");
+  const [studentName, setStudentName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const navigate = useNavigate(); // Initialize navigation
-
+  // Function to validate email format
+  const isValidEmail = (email) => {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailPattern.test(email);
+  };
 
   const createUser = async (event) => {
     event.preventDefault();
-    
+
+    // ✅ Check if email is valid
+    if (!isValidEmail(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
     try {
+      // 🔍 Check Firestore for duplicate email, student ID, or phone number
+      const usersRef = collection(db, "Users");
+      const emailQuery = query(usersRef, where("email", "==", email));
+      const idQuery = query(usersRef, where("studentId", "==", studentId));
+      const phoneQuery = query(usersRef, where("phoneNumber", "==", phoneNumber));
+
+      const emailSnapshot = await getDocs(emailQuery);
+      const idSnapshot = await getDocs(idQuery);
+      const phoneSnapshot = await getDocs(phoneQuery);
+
+      if (!emailSnapshot.empty) {
+        alert("This email is already in use with another account.");
+        return;
+      }
+      if (!idSnapshot.empty) {
+        alert("This Student ID is already taken.");
+        return;
+      }
+      if (!phoneSnapshot.empty) {
+        alert("This phone number is already registered.");
+        return;
+      }
+
+      // ✅ If email, student ID & phone number are unique, create the user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      
+
       if (user) {
-        // Store user data in Firestore
         await setDoc(doc(db, "Users", user.uid), {
-          email: user.email,
-          name: name,
+          studentId,
+          studentName,
+          phoneNumber,
+          email,
         });
+        alert("User created successfully! Redirecting to Sign-In...");
+        navigate("/signin");  // 🔥 Redirect to Sign-In page
+      } else {
+        alert("Error: User not found after signup.");
       }
-  
-      alert("Success");
-      navigate("/search"); // Redirect after successful sign-up
     } catch (error) {
       alert(error.message);
     }
   };
-  
-  
-  const signupWithGoogle = async () => {
-    try {
-      const userCredential = await signInWithPopup(auth, googleProvider);
-      const user = userCredential.user;
-  
-      if (user) {
-        // Store user data in Firestore
-        await setDoc(doc(db, "Users", user.uid), {
-          email: user.email,
-          name: user.displayName, // Get name from Google profile
-        });
-      }
-  
-      alert("Signed up with Google successfully");
-      navigate("/search"); // Redirect after successful Google sign-up
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-  
-  
 
   return (
     <div className="signup-container">
-    {/* Semicircles */}
-    <div className="top-left-circle"></div>
-    <div className="top-right-circle"></div>
+      <div className="top-left-circle"></div>
+      <div className="top-right-circle"></div>
       <div className="signup-header">
         <img src={logo} alt="QuizFizz Logo" className="logo-image" />
       </div>  
-
       <div className="signup-main">
         <div className="signup-form">
           <h2>Sign Up</h2>
           <form onSubmit={createUser}>
             <div className="form-group">
-              <label htmlFor="name">Name</label>
+              <label htmlFor="studentId">Student ID</label>
               <input 
-                onChange={(e) => setName(e.target.value)}
-                value={name}  // Fallback in case of undefined
+                onChange={(e) => setStudentId(e.target.value)}
+                value={studentId}  
                 type="text"
-                id="name"
+                id="studentId"
+                placeholder="Enter your Student ID" 
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="studentName">Student Name</label>
+              <input 
+                onChange={(e) => setStudentName(e.target.value)}
+                value={studentName}  
+                type="text"
+                id="studentName"
                 placeholder="Enter your name" 
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="phoneNumber">Phone Number</label>
+              <input 
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                value={phoneNumber}  
+                type="text"
+                id="phoneNumber"
+                placeholder="Enter your phone number" 
                 required
               />
             </div>
@@ -120,23 +148,12 @@ const SignupPage = () => {
               Sign Up
             </button>
           </form>
-
           <div className="signin-link">
             <p>
               Already have an account? <Link to="/signin">Login</Link>
             </p>
           </div>
-
-          <div className="or-section">
-            <span>OR</span>
-          </div>
-
-          <button onClick={signupWithGoogle} className="google-signup-btn">
-            <img src={google} alt="Google Icon" />
-            Sign up with Google
-          </button>
         </div>
-
         <div className="signup-illustration">
           <img src={signup} alt="Illustration" className="illustration-img" />
         </div>
